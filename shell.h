@@ -6,6 +6,6 @@
 #include <unistd.h>
 
 
-void comd_prompt(char *buffer, size_t nread);
+ssize_t comd_prompt(char *buffer, size_t nread);
 
 #endif

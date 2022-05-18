@@ -7,7 +7,7 @@
 * Returns: numbers of characters read
 */
 
-void comd_prompt(char *buffer, size_t nread)
+ssize_t comd_prompt(char *buffer, size_t nread)
 {
 	int i = 0;
 	size_t size = 1;
