@@ -1,49 +1,36 @@
 #include "main.h"
 
 /**
- * main - implements super simple shell
- *
- * @ac: number of commandline arguments
- * @av: array of commandline arguments
- * @env: array of environment variables
- *
- * Return: 0 success. 1 otherwise
+ * main - Entry point
+ * @argc: number of arguements
+ * @argv: arguement passed into the function
+ * Description: Standard output display of shell.
+ * Return: 0 on success.
  */
-int main(int ac, char **av, char **env)
+
+int main(__attribute__((unused))int argc, char **argv)
 {
-	list_t *env_list = NULL;
-	int shell_return;
+	char *line = NULL, **args;
+	int status = 1;
+	char **chk_env = environ;
+	size_t n = 0;
+	unsigned int count;
 
-	/* create env_list */
-	env_list = create_env(env, env_list);
-
-	/* handle SIGINT */
-	signal(SIGINT, sig_handler);
-
-	/* start shell */
-	shell_return = shell(env_list, av[0]);
-
-	/*check return value of shell */
-	if (shell_return)
-	{
-		free_list(env_list);
-		exit(shell_return);
-	}
-
-	(void)ac;
-
-	free_list(env_list);
-
+	do {
+		if (isatty(STDIN_FILENO))
+			write(STDOUT_FILENO, "($) ", 4);
+		if (chk_env != environ)
+			chk_env = NULL;
+		count = _getline(&line, &n, stdin);
+		if (count == 1)
+			continue;
+		args = get_args(line);
+		status = builtin_args(args);
+		if (status < 0)
+			status = execute_cmd(args, argv);
+		free(args);
+	} while (status);
+	if (chk_env == NULL)
+		free(environ);
 	return (0);
-}
-
-/**
- * sig_handler - handles SIGINT
- * @sig: SIGINT
- */
-void sig_handler(int sig)
-{
-	signal(sig, sig_handler);
-	write(STDOUT_FILENO, "\n", 2);
-	prompt();
 }
