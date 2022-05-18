@@ -1,46 +1,79 @@
-#ifndef SHELL
-#define SHELL
+#ifndef SHELL_H
+#define SHELL_H
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
-#include <dirent.h>
-#include <stddef.h>
-#include <errno.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#define TOKENS_BUFFER_SIZE 64
-#define LINE_SIZE 1024
-#define TOKEN_DELIMITERS " \t\r\n\a"
-extern char **environ;
+#include <sys/stat.h>
+#include <unistd.h>
+#include <errno.h>
+#include <dirent.h>
+#include <signal.h>
+
+
+/*constants*/
+#define EXTERNAL_COMMAND 1
+#define INTERNAL_COMMAND 2
+#define PATH_COMMAND 3
+#define INVALID_COMMAND -1
+
+#define min(x, y) (((x) < (y)) ? (x) : (y))
+
 /**
- * struct builtins - Has builtins and associated funcs
- * @arg: Builtins name
- * @builtin: Mathcing builtin func
+ *struct map - a struct that maps a command name to a function
+ *
+ *@command_name: name of the command
+ *@func: the function that executes the command
  */
-typedef struct builtins
+
+typedef struct map
 {
-	char *arg;
-	void (*builtin)(char **args, char *line, char **env);
-} builtins_t;
-void shell(int ac, char **av, char **env);
-char *_getline(void);
-char **split_line(char *line);
-int execute_prog(char **args, char *line, char **env, int flow);
-int check_for_builtins(char **args, char *line, char **env);
-int launch_prog(char **args);
-void exit_shell(char **args, char *line, char **env);
-void env_shell(char **args, char *line, char **env);
-int _strcmp(char *s1, char *s2);
-char *find_path(char *args, char *tmp, char *er);
-char *search_cwd(char *filename, char *er);
-int bridge(char *check, char **args);
-void prompt(void);
-int builtins_checker(char **args);
-char *save_path(char *tmp, char *path);
-char *read_dir(char *er, struct dirent *s, char *fi, int l, char *p, char *t);
-char *_getenv(char *env);
-char *_strstr(char *haystack, char *needle);
-int _strlen(char *s);
-#endif
+	char *command_name;
+	void (*func)(char **command);
+} function_map;
+
+extern char **environ;
+extern char *line;
+extern char **commands;
+extern char *shell_name;
+extern int status;
+
+/*helpers*/
+void print(char *, int);
+char **tokenizer(char *, char *);
+void remove_newline(char *);
+int _strlen(char *);
+void _strcpy(char *, char *);
+
+/*helpers2*/
+int _strcmp(char *, char *);
+char *_strcat(char *, char *);
+int _strspn(char *, char *);
+int _strcspn(char *, char *);
+char *_strchr(char *, char);
+
+/*helpers3*/
+char *_strtok_r(char *, char *, char **);
+int _atoi(char *);
+void *_realloc(void *ptr, unsigned int old_size, unsigned int new_size);
+void ctrl_c_handler(int);
+void remove_comment(char *);
+
+/*utils*/
+int parse_command(char *);
+void execute_command(char **, int);
+char *check_path(char *);
+void (*get_func(char *))(char **);
+char *_getenv(char *);
+
+/*built_in*/
+void env(char **);
+void quit(char **);
+
+/*main*/
+extern void non_interactive(void);
+extern void initializer(char **current_command, int type_command);
+
+#endif /*SHELL_H*/
