@@ -8,10 +8,10 @@
 
 int main(void)
 {
-    pid_t pid;
+	pid_t pid;
 
-    pid = getpid();
+	pid = getpid();
 
-    printf("%u\n", pid);
-    return (0);
+	printf("%u\n", pid);
+	return (0);
 }
